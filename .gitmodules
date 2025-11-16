@@ -1,0 +1,7 @@
+[submodule "Enzyme"]
+	path = Enzyme
+	url = https://github.com/EnzymeAD/Enzyme.git
+	branch = herbie
+[submodule "llvm-project"]
+	path = llvm-project
+	url = https://github.com/llvm/llvm-project.git

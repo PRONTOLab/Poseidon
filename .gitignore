@@ -1,0 +1,8 @@
+.DS_Store
+*.pkl
+tmp
+cache
+logs
+plots
+outputs
+fpprofile
