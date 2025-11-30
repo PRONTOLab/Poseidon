@@ -33,7 +33,7 @@ def load_data(filename):
 
 
 def process_data(budgets, runtimes, errors, worst_errors=None, filter_budgets=None):
-    mask = runtimes <= 0.05
+    mask = np.ones(len(runtimes), dtype=bool)
     if filter_budgets is not None:
         mask = mask & np.array([b not in filter_budgets for b in budgets])
     budgets = budgets[mask]
