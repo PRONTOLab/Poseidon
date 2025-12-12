@@ -68,6 +68,17 @@ To copy the plot to your host machine:
 sudo docker cp <container_id>:/root/Poseidon/lulesh/lulesh.png .
 ```
 
+**Note**: The 0-ULP result is hardware-dependent. To find the optimal configuration for your hardware, first [regenerate the cost model](#regenerating-the-cost-model), then run:
+
+```bash
+cd $HOME/Poseidon/lulesh
+make && python3 run.py
+python3 benchmark.py --sample-percent 10
+```
+
+This samples 10% of the optimized programs and prints a summary of all budgets achieving a ULP of less than 5 (configurable via `--ulp-threshold`). The best budget reported by the script will result in the optimal rewrites for the user's hardware and should be used in `lulesh/Makefile`.
+
+
 ### 3x3 Eigensolver (TABLE I)
 
 ```bash
@@ -84,6 +95,18 @@ TABLE I entries can be found in these output files.
 
 ## Miscellaneous
 
+### Regenerating the Cost Model
+
+The cost model (`cost-model/cm.csv`) is hardware-specific. To regenerate it for your machine:
+
+```bash
+cd $HOME/Poseidon/cost-model
+python3 microbm.py
+cp results.csv cm.csv
+```
+
+### Full FPBench Run
+
 One can apply Poseidon to all FPBench programs and see statistics by
 
 ```bash
@@ -93,6 +116,8 @@ python3 run.py --analytics
 ```
 
 This will display maximum speedups for each error threshold and accuracy improvement statistics.
+
+### Full LULESH Run
 
 The following commands produce all optimized LULESH programs and perform the full performance/accuracy measurements:
 

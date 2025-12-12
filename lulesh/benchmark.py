@@ -237,9 +237,13 @@ def main():
             "time only the remaining executables and save results to PKL"
         ),
     )
+    parser.add_argument(
+        "--ulp-threshold", type=float, default=5.0, help="ULP threshold for reporting low-error programs (default: 5)"
+    )
     args = parser.parse_args()
     sample_percent = args.sample_percent
     accuracy_filter = args.accuracy_filter
+    ulp_threshold = args.ulp_threshold
 
     gold_file = "lulesh_gold.txt"
     if not os.path.exists(gold_file):
@@ -329,6 +333,7 @@ def main():
 
     print("\n=== Starting accuracy measurements ===")
     error_metrics = {}
+    low_ulp_programs = []
     cpu_count = NUM_PARALLEL
     with multiprocessing.Pool(processes=cpu_count) as pool:
         args_list = list(zip(executable_paths, [ref_values] * len(executable_paths)))
@@ -339,6 +344,19 @@ def main():
             if result and result[1] is not None:
                 budget = result[0]
                 error_metrics[budget] = result[1]
+                ulp_err = result[1].get("final_ulp_error", np.nan)
+                if not np.isnan(ulp_err) and ulp_err < ulp_threshold:
+                    low_ulp_programs.append((budget, ulp_err))
+
+    if low_ulp_programs:
+        print("\n" + "=" * 60)
+        print(f"SUMMARY: Programs with ULP error < {ulp_threshold}")
+        low_ulp_programs.sort(key=lambda x: x[1])
+        for budget, ulp in low_ulp_programs:
+            print(f"  Budget {budget}: ULP = {ulp}")
+        best_budget, best_ulp = low_ulp_programs[0]
+        print(f"\nBest program: Budget {best_budget} with ULP = {best_ulp}")
+        print("=" * 60 + "\n")
 
     if accuracy_filter:
         print("\n=== Filtering executables based on accuracy criteria ===")
