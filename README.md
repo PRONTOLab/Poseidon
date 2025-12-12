@@ -93,6 +93,69 @@ sudo docker cp <container_id>:/root/Poseidon/eig/equal.txt .
 ```
 TABLE I entries can be found in these output files. See [`eig/README.md`](eig/README.md) for details on how to interpret the output.
 
+## Reusing This Artifact
+
+This section describes how to reuse this artifact to apply Poseidon to a new benchmark.
+
+### Step 1: Set Up Paths
+
+Configure the paths to custom builds of LLVM and Enzyme:
+
+```bash
+export CLANG_PATH=<...>/llvm-project/build/bin
+export ENZYME_PATH=<...>/Enzyme/build/Enzyme/ClangEnzyme-X.so
+export PROFILER_PATH=<...>/Enzyme/build/Enzyme
+```
+
+### Step 2: Profiling Pass
+
+First, compile your program with floating-point profiling enabled to collect runtime information:
+
+```bash
+$CLANG_PATH/clang++ -O3 -ffast-math -march=native \
+    -fplugin=$ENZYME_PATH \
+    -mllvm --fpprofile-generate \
+    -L $PROFILER_PATH -lEnzymeFPProfile \
+    your_program.cc -o your_program_prof
+```
+
+### Step 3: Generate Floating-Point Profiles
+
+Run the profiled executable with (potentially, small surrogate) inputs to generate floating-point profiles:
+
+```bash
+./your_program_prof <your_arguments>
+```
+
+This creates an `fpprofile` directory.
+
+### Step 4: Optimization Pass
+
+Now compile with Poseidon's optimization pass enabled:
+
+```bash
+$CLANG_PATH/clang++ -O3 -ffast-math -march=native \
+    -fplugin=$ENZYME_PATH \
+    -mllvm --fpprofile-use=./fpprofile \
+    -mllvm --fpopt-cost-model-path=$HOME/Poseidon/cost-model/cm.csv \
+    your_program.cc -o your_program_opt
+```
+
+This produces an optimized program (`your_program_opt`) that attempts to improve numerical accuracy while preserving performance.
+
+The first run invokes external tool (e.g., Herbie) calls and performs a full dynamic-programming solve, with results cached (in the `cache` directory by default). Subsequent runs reuse these cached results to reduce execution time.
+
+### Step 5 (Optional): Generate and Evaluate Other Optimized Programs
+
+The first compilation generates `cache/budgets.txt` containing all achievable cost budgets from the dynamic-programming solve. To explore other performance/accuracy trade-offs:
+
+1. **Compile with different budgets**: Recompile with varying `--fpopt-comp-cost-budget` values from `cache/budgets.txt`. Each budget produces a differently optimized binary.
+
+2. **Benchmark**: Run each binary and compare outputs against a reference (e.g., the original program) to evaluate its performance and accuracy.
+
+Please see `lulesh/run.py` and `lulesh/benchmark.py` for an example of automating this process.
+
+
 ## Miscellaneous
 
 ### Regenerating the Cost Model
@@ -128,3 +191,17 @@ python3 run.py
 python3 benchmark.py
 ```
 These can take several hours and is not required to reproduce Figure 13.
+
+### Useful Poseidon Flags
+
+| Flag | Description |
+|------|-------------|
+| `--fpprofile-use=<path>` | Path to the generated FP profile directory |
+| `--fpopt-enable-herbie` | Enable Herbie for expression rewriting |
+| `--fpopt-enable-pt` | Enable precision tuning
+| `--fpopt-comp-cost-budget=<N>` | Cost budget for the optimization pass; overrides `enzyme_err_tol` annotation |
+| `--fpopt-num-samples=<N>` | Number of samples for accuracy estimation |
+| `--fpopt-early-prune` | Enable optional pruning steps in the solver |
+| `--herbie-num-threads=<N>` | Number of threads for Herbie |
+| `--fpopt-cache-path=<path>` | Directory to cached results (default: `cache`) |
+| `--fpopt-cost-model-path=<path>` | Path to the cost model CSV |
