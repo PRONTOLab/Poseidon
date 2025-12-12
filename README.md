@@ -8,7 +8,59 @@ This repository contains the artifact for the paper "Thinking Fast and Correct: 
 
 The latest version of this artifact is available [here](https://github.com/PRONTOLab/Poseidon).
 
-## Docker Image
+## Build From Source
+
+### Prerequisites
+
+```bash
+sudo apt install build-essential cmake ninja-build libmpfr-dev
+pip install lit numpy matplotlib tqdm
+```
+
+Additionally, install [Racket](https://racket-lang.org/) and [Rust](https://www.rust-lang.org/tools/install).
+
+### Clone and Initialize Submodules
+
+```bash
+git clone https://github.com/PRONTOLab/Poseidon.git
+cd Poseidon
+git submodule update --init --recursive llvm-project Enzyme
+```
+
+### Build LLVM
+
+```bash
+cd llvm-project
+mkdir build && cd build
+cmake -G Ninja \
+  -DLLVM_ENABLE_PROJECTS="clang" \
+  -DLLVM_ENABLE_LLD=ON \
+  -DLLVM_TARGETS_TO_BUILD="X86" \
+  -DCMAKE_BUILD_TYPE=Release \
+  ../llvm
+ninja
+cd ../..
+```
+
+### Build Enzyme with Poseidon Enabled
+
+```bash
+cd Enzyme
+mkdir build && cd build
+cmake -G Ninja ../enzyme/ \
+  -DLLVM_DIR=<...>/Poseidon/llvm-project/build/lib/cmake/llvm \
+  -DLLVM_EXTERNAL_LIT=$(which lit) \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DENABLE_POSEIDON=ON \
+  -DCMAKE_C_COMPILER=<...>/Poseidon/llvm-project/build/bin/clang \
+  -DCMAKE_CXX_COMPILER=<...>/Poseidon/llvm-project/build/bin/clang++
+ninja
+cd ../..
+```
+
+Replace `<...>` with the path to your Poseidon clone.
+
+## Docker Image (Recommended)
 
 We provide a pre-built Docker image `sbrantq/poseidon`. To start the container:
 
