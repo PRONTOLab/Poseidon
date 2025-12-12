@@ -8,6 +8,14 @@ This repository contains the artifact for the paper "Thinking Fast and Correct: 
 
 The latest version of this artifact is available [here](https://github.com/PRONTOLab/Poseidon).
 
+## Table of Contents
+
+- [Build From Source](#build-from-source)
+- [Docker Image (Recommended)](#docker-image-recommended)
+- [Reproducing Main Results](#reproducing-main-results)
+- [Reusing This Artifact](#reusing-this-artifact)
+- [Miscellaneous](#miscellaneous)
+
 ## Build From Source
 
 ### Prerequisites
