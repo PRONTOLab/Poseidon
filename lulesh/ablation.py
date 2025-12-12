@@ -153,7 +153,7 @@ if __name__ == "__main__":
             line_color = red
         plt.axhline(y=float(rel_error), color=line_color, linestyle="--", linewidth=1)
 
-    plt.xlabel("\\# Significands")
+    plt.xlabel(r"# Significands")
     plt.ylabel("Relative Error")
     plt.yscale("log")
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
