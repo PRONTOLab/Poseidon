@@ -68,7 +68,7 @@ cd ../..
 
 Replace `<...>` with the path to your Poseidon clone.
 
-## Docker Image (Recommended)
+## Docker Image
 
 We provide a pre-built Docker image `sbrantq/poseidon`. To start the container:
 
@@ -85,6 +85,8 @@ sudo docker cp <container_id>:/root/Poseidon/<path_to_file> <host_destination>
 **Note**: For convenience, the container ships cached outputs from external tools: [Herbie](https://github.com/herbie-fp/herbie) (`eig/cache-*` and `lulesh/cache`) and [RAPTOR](https://arxiv.org/pdf/2507.04647v1) (`dquat/dquat_gold.txt`, `eig/eig_gold.txt`). They are auxiliary and not Poseidon's results. One can remove `eig/cache-*` and `lulesh/cache` to rerun from scratch, but recomputation can take several hours.
 
 ## Reproducing Main Results
+
+**Note**: Results are hardware-dependent. The Docker image includes a cost model generated on our machine (AMD Ryzen Threadripper PRO 7995WX). For best performance and reproducibility on different hardware, please try to [build from source](#build-from-source) and [regenerate the cost model](#regenerating-the-cost-model).
 
 ### FPBench Cost Model Ablation Study (Figure 9)
 
