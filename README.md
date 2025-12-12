@@ -91,7 +91,7 @@ To copy results to the host machine:
 sudo docker cp <container_id>:/root/Poseidon/eig/biased.txt .
 sudo docker cp <container_id>:/root/Poseidon/eig/equal.txt .
 ```
-TABLE I entries can be found in these output files.
+TABLE I entries can be found in these output files. See [`eig/README.md`](eig/README.md) for details on how to interpret the output.
 
 ## Miscellaneous
 
